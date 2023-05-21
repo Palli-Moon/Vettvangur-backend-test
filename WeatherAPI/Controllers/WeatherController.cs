@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WeatherAPI.Controllers
@@ -19,11 +20,11 @@ namespace WeatherAPI.Controllers
             _API = new WeatherAPIWrapper(_client, apiKey);
         }
 
-        [HttpGet(Name = "GetWeather")]
-        public string Get()
+        [HttpGet]
+        [Route("{city}")]
+        public async Task<object> GetCurrentWeather(string city)
         {
-
-            return "";
+            return await _API.CurrentWeather(city);
         }
     }
 }

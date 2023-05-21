@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using Newtonsoft.Json.Converters;
+using System.Text;
 using System.Text.Json;
 using WeatherAPI.Models;
 
@@ -15,33 +16,45 @@ namespace WeatherAPI
             _client = client;
             _baseAddress = client.BaseAddress ?? throw new Exception("Could not find base address for external API");
             _apiKey = apiKey;
-            GetCityIcaoCode("Reykjavik");
         }
 
-        private HttpContent SendRequest(UriBuilder builder)
+        public async Task<CurrentWeatherModel> CurrentWeather(string city)
         {
-            var request = new HttpRequestMessage
+            var location = await GetCityIcaoCode(city);
+
+            var builder = new UriBuilder(_baseAddress)
+            {
+                Path = "/v3/wx/observations/current",
+                Query = $"icaoCode={location}{GetCommonQuery()}"
+            };
+
+            return await SendAndDeserialize<CurrentWeatherModel>(builder);
+        }
+
+        #region Helpers
+        private async Task<T> SendAndDeserialize<T>(UriBuilder builder)
+        {
+            var req = new HttpRequestMessage
             {
                 RequestUri = builder.Uri,
                 Method = HttpMethod.Get,
                 Content = null
             };
 
-            var response = _client.Send(request);
-            response.EnsureSuccessStatusCode();
-            return response.Content;
+            var res = _client.Send(req);
+            res.EnsureSuccessStatusCode();
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            return await res.Content.ReadFromJsonAsync<T>(options) ?? throw new Exception("Error serializing content");
         }
 
-        private string GetCityIcaoCode(string city)
+        private async Task<string> GetCityIcaoCode(string city)
         {
             var builder = new UriBuilder(_baseAddress)
             {
                 Path = "/v3/location/search",
                 Query = $"query={city}&locationType=city{GetCommonQuery(false)}"
             };
-            var res = SendRequest(builder);
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            var locations = res.ReadFromJsonAsync<LocationModel>(options).Result;
+            var locations = await SendAndDeserialize<LocationModel>(builder);
             var icaoCodes = locations?.Location?.IcaoCode;
 
             if (icaoCodes != null && icaoCodes.Length > 0)
@@ -54,8 +67,9 @@ namespace WeatherAPI
         {
             var query = $"&language=en-US&format=json&apiKey={_apiKey}";
             if (includeUnits)
-                query += "&units";
+                query += "&units=m";
             return query;
         }
+        #endregion
     }
 }
