@@ -36,6 +36,22 @@ namespace WeatherAPI
             return res;
         }
 
+        public async Task<ForecastWeatherModel> WeatherForecast(string city)
+        {
+            var location = await GetCity(city);
+
+            var builder = new UriBuilder(_baseAddress)
+            {
+                Path = "/v3/wx/forecast/daily/15day",
+                Query = $"icaoCode={location.Item1}{GetCommonQuery()}"
+            };
+
+            var res = await SendAndDeserialize<ForecastWeatherModel>(builder);
+            res.City = location.Item1;
+
+            return res;
+        }
+
         #region Helpers
         private async Task<T> SendAndDeserialize<T>(UriBuilder builder)
         {
