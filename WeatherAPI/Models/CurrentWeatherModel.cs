@@ -2,6 +2,8 @@
 {
     public class CurrentWeatherModel
     {
+        public string? City { get; set; } // TODO: TEMP
+
         public float Precip24Hour { get; set; }
         public string? SunriseTimeLocal { get; set; }
         public string? SunsetTimeLocal { get; set; }

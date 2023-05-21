@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json.Converters;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using WeatherAPI.Models;
 
@@ -20,15 +19,18 @@ namespace WeatherAPI
 
         public async Task<CurrentWeatherModel> CurrentWeather(string city)
         {
-            var location = await GetCityIcaoCode(city);
+            var location = await GetCity(city);
 
             var builder = new UriBuilder(_baseAddress)
             {
                 Path = "/v3/wx/observations/current",
-                Query = $"icaoCode={location}{GetCommonQuery()}"
+                Query = $"icaoCode={location.Item1}{GetCommonQuery()}"
             };
 
-            return await SendAndDeserialize<CurrentWeatherModel>(builder);
+            var res = await SendAndDeserialize<CurrentWeatherModel>(builder);
+            res.City = location.Item2;
+
+            return res;
         }
 
         #region Helpers
@@ -41,13 +43,13 @@ namespace WeatherAPI
                 Content = null
             };
 
-            var res = _client.Send(req);
+            var res = await _client.SendAsync(req);
             res.EnsureSuccessStatusCode();
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             return await res.Content.ReadFromJsonAsync<T>(options) ?? throw new Exception("Error serializing content");
         }
 
-        private async Task<string> GetCityIcaoCode(string city)
+        private async Task<Tuple<string, string>> GetCity(string city)
         {
             var builder = new UriBuilder(_baseAddress)
             {
@@ -56,9 +58,10 @@ namespace WeatherAPI
             };
             var locations = await SendAndDeserialize<LocationModel>(builder);
             var icaoCodes = locations?.Location?.IcaoCode;
+            var address = locations?.Location?.Address;
 
-            if (icaoCodes != null && icaoCodes.Length > 0)
-                return icaoCodes[0];
+            if (icaoCodes != null && address != null && icaoCodes.Length > 0)
+                return new Tuple<string, string>(icaoCodes[0], address[0]);
 
             throw new Exception($"The location {city} was not found");
         }
