@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using WeatherAPI.DTO;
 
 namespace WeatherAPI.Controllers
 {
@@ -25,14 +26,14 @@ namespace WeatherAPI.Controllers
 
         [HttpGet]
         [Route("{city}")]
-        public async Task<object> GetCurrentWeather(string city) // TODO: Remove <object>
+        public async Task<WeatherDTO> GetCurrentWeather(string city)
         {
             return await _API.CurrentWeather(city);
         }
 
         [HttpGet]
         [Route("{city}/forecast")]
-        public async Task<object> GetWeatherForecast(string city) // TODO: Remove <object>
+        public async Task<object> GetWeatherForecast(string city)
         {
             return await _API.WeatherForecast(city);
         }

@@ -2,7 +2,6 @@
 {
     public class CurrentWeatherModel
     {
-        public string City { get; set; } // TODO: TEMP
         public string DayOfWeek { get; set; }
         public string SunriseTimeLocal { get; set; }
         public string SunsetTimeLocal { get; set; }

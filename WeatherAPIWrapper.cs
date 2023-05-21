@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using WeatherAPI.DTO;
 using WeatherAPI.Models;
 
 namespace WeatherAPI
@@ -20,7 +21,7 @@ namespace WeatherAPI
             _apiKey = apiKey;
         }
 
-        public async Task<CurrentWeatherModel> CurrentWeather(string city)
+        public async Task<WeatherDTO> CurrentWeather(string city)
         {
             var location = await GetCity(city);
 
@@ -31,9 +32,7 @@ namespace WeatherAPI
             };
 
             var res = await SendAndDeserialize<CurrentWeatherModel>(builder);
-            res.City = location.Item2;
-
-            return res;
+            return ModelToDTO.Convert(res, location.Item2);
         }
 
         public async Task<ForecastWeatherModel> WeatherForecast(string city)
@@ -42,7 +41,7 @@ namespace WeatherAPI
 
             var builder = new UriBuilder(_baseAddress)
             {
-                Path = "/v3/wx/forecast/daily/15day",
+                Path = "/v3/wx/forecast/daily/5day",
                 Query = $"icaoCode={location.Item1}{GetCommonQuery()}"
             };
 

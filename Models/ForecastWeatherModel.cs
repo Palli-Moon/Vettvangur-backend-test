@@ -20,6 +20,8 @@
         public string?[]? DayOrNight { get; set; }
         public string?[]? DayPartName { get; set; }
         public int?[]? UvIndex { get; set; }
+        public string?[]? WindDirectionCardinal { get; set; }
+        public int?[]? WindSpeed { get; set; }
         public string?[]? VxPhraseLong { get; set; }
     }
 }
