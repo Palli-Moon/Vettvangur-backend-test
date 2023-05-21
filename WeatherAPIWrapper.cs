@@ -1,5 +1,8 @@
-﻿using System.Text;
+﻿using System;
+using System.Net.Http;
+using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 using WeatherAPI.Models;
 
 namespace WeatherAPI
@@ -45,8 +48,9 @@ namespace WeatherAPI
 
             var res = await _client.SendAsync(req);
             res.EnsureSuccessStatusCode();
+            var resString = await res.Content.ReadAsStringAsync();
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            return await res.Content.ReadFromJsonAsync<T>(options) ?? throw new Exception("Error serializing content");
+            return JsonSerializer.Deserialize<T>(resString, options);
         }
 
         private async Task<Tuple<string, string>> GetCity(string city)
