@@ -1,5 +1,8 @@
-﻿using System.Text;
+﻿using System;
+using System.Net.Http;
+using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 using WeatherAPI.Models;
 
 namespace WeatherAPI
@@ -33,6 +36,22 @@ namespace WeatherAPI
             return res;
         }
 
+        public async Task<ForecastWeatherModel> WeatherForecast(string city)
+        {
+            var location = await GetCity(city);
+
+            var builder = new UriBuilder(_baseAddress)
+            {
+                Path = "/v3/wx/forecast/daily/15day",
+                Query = $"icaoCode={location.Item1}{GetCommonQuery()}"
+            };
+
+            var res = await SendAndDeserialize<ForecastWeatherModel>(builder);
+            res.City = location.Item1;
+
+            return res;
+        }
+
         #region Helpers
         private async Task<T> SendAndDeserialize<T>(UriBuilder builder)
         {
@@ -45,8 +64,9 @@ namespace WeatherAPI
 
             var res = await _client.SendAsync(req);
             res.EnsureSuccessStatusCode();
+            var resString = await res.Content.ReadAsStringAsync();
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            return await res.Content.ReadFromJsonAsync<T>(options) ?? throw new Exception("Error serializing content");
+            return JsonSerializer.Deserialize<T>(resString, options);
         }
 
         private async Task<Tuple<string, string>> GetCity(string city)

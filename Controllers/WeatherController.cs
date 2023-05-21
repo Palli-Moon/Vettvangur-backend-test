@@ -1,5 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using System;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace WeatherAPI.Controllers
 {
@@ -21,9 +25,16 @@ namespace WeatherAPI.Controllers
 
         [HttpGet]
         [Route("{city}")]
-        public async Task<object> GetCurrentWeather(string city)
+        public async Task<object> GetCurrentWeather(string city) // TODO: Remove <object>
         {
             return await _API.CurrentWeather(city);
+        }
+
+        [HttpGet]
+        [Route("{city}/forecast")]
+        public async Task<object> GetWeatherForecast(string city) // TODO: Remove <object>
+        {
+            return await _API.WeatherForecast(city);
         }
     }
 }
