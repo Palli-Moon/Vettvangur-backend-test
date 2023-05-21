@@ -1,6 +1,9 @@
 ﻿namespace WeatherAPI.Models
 {
-    public class ForecastWeatherModel
+    /// <summary>
+    /// Model for forecase weather data
+    /// </summary>
+    public class ForecastWeatherModel : IModel
     {
 #nullable enable
         public string?[] DayOfWeek { get; set; }

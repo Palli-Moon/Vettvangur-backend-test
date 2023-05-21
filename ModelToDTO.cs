@@ -18,7 +18,7 @@ namespace WeatherAPI
         /// <param name="model">Model for current weather</param>
         /// <param name="city">City that we searched for, since we add it to the DTO</param>
         /// <returns>Weather DTO to be returned to the user</returns>
-        public static WeatherDTO Convert(CurrentWeatherModel model, string city = "")
+        public static WeatherDTO Convert(CurrentWeatherModel model, string city)
         {
 
             return new WeatherDTO
@@ -47,7 +47,7 @@ namespace WeatherAPI
         /// <param name="model">Model for weather forecast</param>
         /// <param name="city">City that we searched for, since we add it to the DTO</param>
         /// <returns>List of Weather DTOs to be returned to the user</returns>
-        public static IEnumerable<WeatherDTO> Convert(ForecastWeatherModel model, string city = "")
+        public static IEnumerable<WeatherDTO> Convert(ForecastWeatherModel model, string city)
         {
             // Some props are have a day or night value. If it's already night when data is fetched these values are null for today.
             // In this example we display the day version of these values except for today if it's night.
@@ -79,13 +79,21 @@ namespace WeatherAPI
             return dtos;
         }
 
-        public static IEnumerable<BaseWeatherDTO> Convert(HistoricalWeatherModel model, string city = "")
+        /// <summary>
+        /// Convert HistoricalWeatherModel to a list of HistoryWeatherDTO.
+        /// Number of days will decide how far back in history we will show. 30 is the maximum.
+        /// </summary>
+        /// <param name="numberOfDays">Days to show. Max 30</param>
+        /// <param name="model">Model for historical weather</param>
+        /// <param name="city">City that we searched for, since we add it to the DTO</param>
+        /// <returns>List of historical weather DTOs to be returned to the user</returns>
+        public static IEnumerable<HistoryWeatherDTO> Convert(HistoricalWeatherModel model, string city, int numberOfDays)
         {
-            var dtos = new List<BaseWeatherDTO>();
+            var dtos = new List<HistoryWeatherDTO>();
 
-            for (int i = 0; i < model.DayOfWeek.Length; i++)
+            for (int i = 0; i < numberOfDays; i++)
             {
-                dtos.Add(new BaseWeatherDTO
+                dtos.Add(new HistoryWeatherDTO
                 {
                     City = city,
                     Date = ParseDate(model.ValidTimeLocal[i]),

@@ -5,7 +5,7 @@ namespace WeatherAPI.DTO
     /// <summary>
     /// Base for WeatherDTO and used against HistoricalWeatherModel since it has very few props
     /// </summary>
-    public class BaseWeatherDTO
+    public abstract class BaseWeatherDTO
     {
         public string City { get; set; }
         public string Date { get; set; }

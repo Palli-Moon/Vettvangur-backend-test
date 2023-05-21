@@ -1,6 +1,9 @@
 ﻿namespace WeatherAPI.Models
 {
-    public class CurrentWeatherModel
+    /// <summary>
+    /// Model for current weather data
+    /// </summary>
+    public class CurrentWeatherModel : IModel
     {
         public string DayOfWeek { get; set; }
         public string ValidTimeLocal { get; set; }

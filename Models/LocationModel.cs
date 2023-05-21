@@ -1,6 +1,9 @@
 ﻿namespace WeatherAPI.Models
 {
-    public class LocationModel
+    /// <summary>
+    /// Model for location data. Used in city searching
+    /// </summary>
+    public class LocationModel : IModel
     {
         public Location Location { get; set; }
     }
