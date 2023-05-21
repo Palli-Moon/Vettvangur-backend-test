@@ -9,24 +9,21 @@ namespace WeatherAPI.Controllers
     public class WeatherController : ControllerBase
     {
         private readonly HttpClient _client;
-        private readonly RequestBuilder _requests;
+        private readonly WeatherAPIWrapper _API;
 
-        public WeatherController(IHttpClientFactory clientFactory)
+        public WeatherController(IHttpClientFactory clientFactory, IConfiguration config)
         {
             _client = clientFactory.CreateClient("Weather.com");
-            if (_client.BaseAddress == null)
-                throw new Exception("Could not find base address for external API");
+            string apiKey = config.GetValue<string>("ApiKey") ?? throw new Exception("API Key missing. Can not continue");
 
-            _requests = new RequestBuilder(_client.BaseAddress);
+            _API = new WeatherAPIWrapper(_client, apiKey);
         }
 
         [HttpGet(Name = "GetWeather")]
         public string Get()
         {
-            
-            var response = _client.Send(request);
-            response.EnsureSuccessStatusCode();
-            return response.Content.ToString();
+
+            return "";
         }
     }
 }

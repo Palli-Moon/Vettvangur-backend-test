@@ -2,6 +2,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.Services.AddSingleton<string>(builder.Configuration["ApiKey"]);
 builder.Services.AddControllers();
 builder.Services.AddHttpClient("Weather.com", client => {
     client.BaseAddress = new Uri("https://api.weather.com");
