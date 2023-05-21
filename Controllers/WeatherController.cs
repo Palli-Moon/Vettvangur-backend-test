@@ -38,5 +38,12 @@ namespace WeatherAPI.Controllers
         {
             return await _API.WeatherForecast(city);
         }
+
+        [HttpGet]
+        [Route("{city}/history")]
+        public async Task<IEnumerable<BaseWeatherDTO>> GetHistoricalWeather(string city)
+        {
+            return await _API.HistoricalWeather(city);
+        }
     }
 }

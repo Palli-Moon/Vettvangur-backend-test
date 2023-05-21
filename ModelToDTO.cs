@@ -1,9 +1,14 @@
 ﻿using WeatherAPI.DTO;
 using WeatherAPI.Models;
 using System.Collections.Generic;
+using System;
+using System.Reflection;
 
 namespace WeatherAPI
 {
+    /// <summary>
+    /// A static class to help convert the models to the DTO
+    /// </summary>
     public static class ModelToDTO
     {
         /// <summary>
@@ -15,13 +20,15 @@ namespace WeatherAPI
         /// <returns>Weather DTO to be returned to the user</returns>
         public static WeatherDTO Convert(CurrentWeatherModel model, string city = "")
         {
+
             return new WeatherDTO
             {
                 City = city,
+                Date = ParseDate(model.ValidTimeLocal),
                 DayOfWeek = model.DayOfWeek,
                 Precipitation = model.Precip24Hour,
-                SunriseTime = model.SunriseTimeLocal,
-                SunsetTime = model.SunsetTimeLocal,
+                SunriseTime = ParseTime(model.SunriseTimeLocal),
+                SunsetTime = ParseTime(model.SunsetTimeLocal),
                 Temperature = model.Temperature,
                 TemperatureMax = model.TemperatureMax24Hour,
                 TemperatureMin = model.TemperatureMin24Hour,
@@ -54,10 +61,11 @@ namespace WeatherAPI
                 dtos.Add(new WeatherDTO
                 {
                     City = city,
+                    Date = ParseDate(model.ValidTimeLocal[i]),
                     DayOfWeek = model.DayOfWeek[i],
                     Precipitation = model.Qpf[i],
-                    SunriseTime = model.SunriseTimeLocal[i],
-                    SunsetTime = model.SunsetTimeLocal[i],
+                    SunriseTime = ParseTime(model.SunriseTimeLocal[i]),
+                    SunsetTime = ParseTime(model.SunsetTimeLocal[i]),
                     Temperature = model.DayPart[0]?.Temperature[i * 2 + offset],
                     TemperatureMax = model.CalendarDayTemperatureMax[i],
                     TemperatureMin = model.CalendarDayTemperatureMin[i],
@@ -69,6 +77,37 @@ namespace WeatherAPI
             }
 
             return dtos;
+        }
+
+        public static IEnumerable<BaseWeatherDTO> Convert(HistoricalWeatherModel model, string city = "")
+        {
+            var dtos = new List<BaseWeatherDTO>();
+
+            for (int i = 0; i < model.DayOfWeek.Length; i++)
+            {
+                dtos.Add(new BaseWeatherDTO
+                {
+                    City = city,
+                    Date = ParseDate(model.ValidTimeLocal[i]),
+                    DayOfWeek = model.DayOfWeek[i],
+                    Precipitation = model.Precip24Hour[i],
+                    TemperatureMax = model.TemperatureMax[i],
+                    TemperatureMin = model.TemperatureMin[i],
+                    Description = model.WxPhraseLongDay[i] ?? model.WxPhraseLongNight[i],
+                });
+            }
+
+            return dtos;
+        }
+
+        private static string ParseDate(string timestamp)
+        {
+            return DateTime.Parse(timestamp).ToString("M", System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        private static string ParseTime(string timestamp)
+        {
+            return DateTime.Parse(timestamp).ToString("t", System.Globalization.CultureInfo.InvariantCulture);
         }
     }
 }

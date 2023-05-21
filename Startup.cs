@@ -25,8 +25,10 @@ namespace WeatherAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Setup the secret ApiKey
             services.AddSingleton(Configuration["ApiKey"]);
             services.AddControllers();
+            // Setup the HttpClient to speak to the API
             services.AddHttpClient("Weather.com", client =>
             {
                 client.BaseAddress = new Uri("https://api.weather.com");

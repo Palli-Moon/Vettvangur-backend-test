@@ -50,6 +50,20 @@ namespace WeatherAPI
             return ModelToDTO.Convert(res, location.Item2);
         }
 
+        public async Task<IEnumerable<BaseWeatherDTO>> HistoricalWeather(string city)
+        {
+            var location = await GetCity(city);
+
+            var builder = new UriBuilder(_baseAddress)
+            {
+                Path = "/v3/wx/conditions/historical/dailysummary/30day",
+                Query = $"icaoCode={location.Item1}{GetCommonQuery()}"
+            };
+
+            var res = await SendAndDeserialize<HistoricalWeatherModel>(builder);
+            return ModelToDTO.Convert(res, location.Item2);
+        }
+
         #region Helpers
         private async Task<T> SendAndDeserialize<T>(UriBuilder builder)
         {

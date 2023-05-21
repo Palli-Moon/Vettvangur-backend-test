@@ -4,6 +4,7 @@
     {
 #nullable enable
         public string?[] DayOfWeek { get; set; }
+        public string?[] ValidTimeLocal { get; set; }
         public string?[] SunriseTimeLocal { get; set; }
         public string?[] SunsetTimeLocal { get; set; }
 
