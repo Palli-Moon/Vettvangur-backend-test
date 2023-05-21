@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using WeatherAPI.DTO;
 using WeatherAPI.Models;
+using System.Collections.Generic;
 
 namespace WeatherAPI
 {
@@ -35,7 +36,7 @@ namespace WeatherAPI
             return ModelToDTO.Convert(res, location.Item2);
         }
 
-        public async Task<ForecastWeatherModel> WeatherForecast(string city)
+        public async Task<IEnumerable<WeatherDTO>> WeatherForecast(string city)
         {
             var location = await GetCity(city);
 
@@ -46,9 +47,7 @@ namespace WeatherAPI
             };
 
             var res = await SendAndDeserialize<ForecastWeatherModel>(builder);
-            res.City = location.Item1;
-
-            return res;
+            return ModelToDTO.Convert(res, location.Item2);
         }
 
         #region Helpers

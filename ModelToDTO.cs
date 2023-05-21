@@ -1,5 +1,6 @@
 ﻿using WeatherAPI.DTO;
 using WeatherAPI.Models;
+using System.Collections.Generic;
 
 namespace WeatherAPI
 {
@@ -24,12 +25,30 @@ namespace WeatherAPI
             };
         }
 
-        public static WeatherDTO Convert(ForecastWeatherModel model, string city = "")
+        public static IEnumerable<WeatherDTO> Convert(ForecastWeatherModel model, string city = "")
         {
-            return new WeatherDTO
-            {
+            var dtos = new List<WeatherDTO>();
 
-            };
+            for (int i = 0; i < model.DayOfWeek.Length; i++)
+            {
+                dtos.Add(new WeatherDTO
+                {
+                    City = city,
+                    DayOfWeek = model.DayOfWeek[i],
+                    Precipitation = model.Qpf[i],
+                    SunriseTime = model.SunriseTimeLocal[i],
+                    SunsetTime = model.SunsetTimeLocal[i],
+                    Temperature = 0, // TODO
+                    TemperatureMax = model.TemperatureMax[i],
+                    TemperatureMin = model.TemperatureMin[i],
+                    UvIndex = 0, // TODO
+                    WindDirection = "", // TODO
+                    WindSpeed = 0, // TODO
+                    Description = model.Narrative[i] // TODO?
+                });
+            }
+
+            return dtos;
         }
     }
 }

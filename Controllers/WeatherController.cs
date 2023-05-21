@@ -5,6 +5,7 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using WeatherAPI.DTO;
+using System.Collections.Generic;
 
 namespace WeatherAPI.Controllers
 {
@@ -33,7 +34,7 @@ namespace WeatherAPI.Controllers
 
         [HttpGet]
         [Route("{city}/forecast")]
-        public async Task<object> GetWeatherForecast(string city)
+        public async Task<IEnumerable<WeatherDTO>> GetWeatherForecast(string city)
         {
             return await _API.WeatherForecast(city);
         }
