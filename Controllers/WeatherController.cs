@@ -90,5 +90,17 @@ namespace WeatherAPI.Controllers
                 return StatusCode((int)ex.statusCode, ex.message);
             }
         }
+
+        /// <summary>
+        /// Displays an error message if the route is not defined
+        /// </summary>
+        /// <param name="catchAll">Url path of the requested unavailable route</param>
+        /// <returns>Bad Request response</returns>
+        [HttpGet]
+        [Route("/{**catchAll}")]
+        public IActionResult CatchAll(string catchAll)
+        {
+            return BadRequest($"The route '{catchAll}' is not available.");
+        }
     }
 }
