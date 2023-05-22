@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using WeatherAPI.DTO;
 using System.Collections.Generic;
 using System.Net;
+using WeatherAPI.Exceptions;
 
 namespace WeatherAPI.Controllers
 {
@@ -37,7 +38,14 @@ namespace WeatherAPI.Controllers
         [Route("{city}")]
         public async Task<ActionResult<WeatherDTO>> GetCurrentWeather(string city)
         {
-            return Ok(await _API.CurrentWeather(city));
+            try
+            {
+                return Ok(await _API.CurrentWeather(city));
+            } 
+            catch (RequestException ex)
+            {
+                return StatusCode((int)ex.statusCode, ex.message);
+            }
         }
 
         /// <summary>
@@ -49,7 +57,14 @@ namespace WeatherAPI.Controllers
         [Route("{city}/forecast")]
         public async Task<ActionResult<WeatherDTO>> GetWeatherForecast(string city)
         {
-            return Ok(await _API.WeatherForecast(city));
+            try
+            {
+                return Ok(await _API.WeatherForecast(city));
+            } 
+            catch (RequestException ex)
+            {
+                return StatusCode((int)ex.statusCode, ex.message);
+            }
         }
 
         /// <summary>
@@ -63,10 +78,17 @@ namespace WeatherAPI.Controllers
         [Route("{city}/history/{numberOfDays}")]
         public async Task<ActionResult<HistoryWeatherDTO>> GetHistoricalWeather(string city, int numberOfDays = 30)
         {
-            if (numberOfDays < 0 || numberOfDays > 30)
-                return BadRequest("Last parameter has to be a number between 0 and 30. Defaults to 30 if skipped.");
+            try
+            {
+                if (numberOfDays < 0 || numberOfDays > 30)
+                    return BadRequest("Last parameter has to be a number between 0 and 30. Defaults to 30 if skipped.");
 
-            return Ok(await _API.HistoricalWeather(city, numberOfDays));
+                return Ok(await _API.HistoricalWeather(city, numberOfDays));
+            }
+            catch (RequestException ex)
+            {
+                return StatusCode((int)ex.statusCode, ex.message);
+            }
         }
     }
 }

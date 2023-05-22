@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using WeatherAPI.DTO;
 using WeatherAPI.Models;
 using System.Collections.Generic;
+using WeatherAPI.Exceptions;
+using System.Net;
 
 namespace WeatherAPI
 {
@@ -34,14 +36,24 @@ namespace WeatherAPI
         {
             var location = await GetCity(city);
 
-            var builder = new UriBuilder(_baseAddress)
+            try
             {
-                Path = "/v3/wx/observations/current",
-                Query = $"icaoCode={location.Item1}{GetCommonQuery()}"
-            };
+                var builder = new UriBuilder(_baseAddress)
+                {
+                    Path = "/v3/wx/observations/current",
+                    Query = $"icaoCode={location.Item1}{GetCommonQuery()}"
+                };
 
-            var res = await SendAndDeserialize<CurrentWeatherModel>(builder);
-            return ModelToDTO.Convert(res, location.Item2);
+                var res = await SendAndDeserialize<CurrentWeatherModel>(builder);
+                return ModelToDTO.Convert(res, location.Item2);
+            }
+            catch (RequestException ex)
+            {
+                throw new RequestException(ex.statusCode, $"Failed to get the current weather.");
+            }
+            catch (Exception) {
+                throw new RequestException(HttpStatusCode.InternalServerError, $"Unknown error when trying to get current weather.");
+            }
         }
 
         /// <summary>
@@ -53,14 +65,25 @@ namespace WeatherAPI
         {
             var location = await GetCity(city);
 
-            var builder = new UriBuilder(_baseAddress)
+            try
             {
-                Path = "/v3/wx/forecast/daily/5day",
-                Query = $"icaoCode={location.Item1}{GetCommonQuery()}"
-            };
+                var builder = new UriBuilder(_baseAddress)
+                {
+                    Path = "/v3/wx/forecast/daily/5day",
+                    Query = $"icaoCode={location.Item1}{GetCommonQuery()}"
+                };
 
-            var res = await SendAndDeserialize<ForecastWeatherModel>(builder);
-            return ModelToDTO.Convert(res, location.Item2);
+                var res = await SendAndDeserialize<ForecastWeatherModel>(builder);
+                return ModelToDTO.Convert(res, location.Item2);
+            } 
+            catch (RequestException ex)
+            {
+                throw new RequestException(ex.statusCode, $"Failed to get the weather forecast.");
+            }
+            catch (Exception)
+            {
+                throw new RequestException(HttpStatusCode.InternalServerError, $"Unknown error when trying to get current weather.");
+            }
         }
 
         /// <summary>
@@ -73,14 +96,25 @@ namespace WeatherAPI
         {
             var location = await GetCity(city);
 
-            var builder = new UriBuilder(_baseAddress)
+            try
             {
-                Path = "/v3/wx/conditions/historical/dailysummary/30day",
-                Query = $"icaoCode={location.Item1}{GetCommonQuery()}"
-            };
+                var builder = new UriBuilder(_baseAddress)
+                {
+                    Path = "/v3/wx/conditions/historical/dailysummary/30day",
+                    Query = $"icaoCode={location.Item1}{GetCommonQuery()}"
+                };
 
-            var res = await SendAndDeserialize<HistoricalWeatherModel>(builder);
-            return ModelToDTO.Convert(res, location.Item2, numberOfDays);
+                var res = await SendAndDeserialize<HistoricalWeatherModel>(builder);
+                return ModelToDTO.Convert(res, location.Item2, numberOfDays);
+            }
+            catch (RequestException ex)
+            {
+                throw new RequestException(ex.statusCode, $"Failed to get historical weather.");
+            }
+            catch (Exception)
+            {
+                throw new RequestException(HttpStatusCode.InternalServerError, $"Unknown error when trying to get current weather.");
+            }
         }
 
         #region Helpers
@@ -101,7 +135,8 @@ namespace WeatherAPI
             };
 
             var res = await _client.SendAsync(req);
-            res.EnsureSuccessStatusCode();
+            if (!res.IsSuccessStatusCode)
+                throw new RequestException(res);
             var resString = await res.Content.ReadAsStringAsync();
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             return JsonSerializer.Deserialize<T>(resString, options);
@@ -116,19 +151,30 @@ namespace WeatherAPI
         /// <exception cref="Exception">Thrown if city was not found</exception>
         private async Task<Tuple<string, string>> GetCity(string city)
         {
-            var builder = new UriBuilder(_baseAddress)
+            try
             {
-                Path = "/v3/location/search",
-                Query = $"query={city}&locationType=city{GetCommonQuery(false)}"
-            };
-            var locations = await SendAndDeserialize<LocationModel>(builder);
-            var icaoCodes = locations?.Location?.IcaoCode;
-            var address = locations?.Location?.Address;
+                var builder = new UriBuilder(_baseAddress)
+                {
+                    Path = "/v3/location/search",
+                    Query = $"query={city}&locationType=city{GetCommonQuery(false)}"
+                };
+                var locations = await SendAndDeserialize<LocationModel>(builder);
+                var icaoCodes = locations?.Location?.IcaoCode;
+                var address = locations?.Location?.Address;
 
-            if (icaoCodes != null && address != null && icaoCodes.Length > 0)
-                return new Tuple<string, string>(icaoCodes[0], address[0]);
+                if (icaoCodes != null && address != null && icaoCodes.Length > 0)
+                    return new Tuple<string, string>(icaoCodes[0], address[0]);
 
-            throw new Exception($"The location {city} was not found");
+                throw new Exception($"The location {city} was not found");
+            } 
+            catch (RequestException ex)
+            {
+                throw new RequestException(ex.statusCode, $"Failed to get the requested city: {city}");
+            }
+            catch (Exception)
+            {
+                throw new RequestException(HttpStatusCode.InternalServerError, $"Unknown error when trying to get requested city.");
+            }
         }
 
         /// <summary>
